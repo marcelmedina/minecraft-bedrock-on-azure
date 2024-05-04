@@ -89,10 +89,6 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2019-12-01'
                 value: '${enableCommandBlock}'
             }
             {
-                name: 'ALLOW_CHEATS'
-                value: '${enableCommandBlock}'
-            }
-            {
                 name: 'MOTD'
                 value: motd
             }

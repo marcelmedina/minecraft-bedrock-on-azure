@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.26.170.59819",
-      "templateHash": "15121846794988672386"
+      "templateHash": "5193954101278111201"
     }
   },
   "parameters": {
@@ -145,10 +145,6 @@
                 },
                 {
                   "name": "ENABLE_COMMAND_BLOCK",
-                  "value": "[format('{0}', parameters('enableCommandBlock'))]"
-                },
-                {
-                  "name": "ALLOW_CHEATS",
                   "value": "[format('{0}', parameters('enableCommandBlock'))]"
                 },
                 {
