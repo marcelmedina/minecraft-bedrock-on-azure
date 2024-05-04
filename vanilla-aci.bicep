@@ -2,7 +2,7 @@
 @description('Server Name. (will be used as the DNS Label)')
 param serverName string=''
 @description('CPUs for the server')
-param numberCpuCores int = 1
+param numberCpuCores int = 2
 
 @description('Memory available to the server. Will allocate all except 100MB to Java')
 param memory int = 4
@@ -86,6 +86,10 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2019-12-01'
             }
             {
                 name: 'ENABLE_COMMAND_BLOCK'
+                value: '${enableCommandBlock}'
+            }
+            {
+                name: 'ALLOW_CHEATS'
                 value: '${enableCommandBlock}'
             }
             {

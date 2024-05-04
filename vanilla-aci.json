@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.26.170.59819",
-      "templateHash": "12740258964324927708"
+      "templateHash": "15121846794988672386"
     }
   },
   "parameters": {
@@ -18,7 +18,7 @@
     },
     "numberCpuCores": {
       "type": "int",
-      "defaultValue": 1,
+      "defaultValue": 2,
       "metadata": {
         "description": "CPUs for the server"
       }
@@ -145,6 +145,10 @@
                 },
                 {
                   "name": "ENABLE_COMMAND_BLOCK",
+                  "value": "[format('{0}', parameters('enableCommandBlock'))]"
+                },
+                {
+                  "name": "ALLOW_CHEATS",
                   "value": "[format('{0}', parameters('enableCommandBlock'))]"
                 },
                 {
