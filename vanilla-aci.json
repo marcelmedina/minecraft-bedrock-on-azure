@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.24.24.22086",
-      "templateHash": "15496192230248160961"
+      "version": "0.26.170.59819",
+      "templateHash": "12740258964324927708"
     }
   },
   "parameters": {
@@ -129,7 +129,7 @@
           {
             "name": "[parameters('serverName')]",
             "properties": {
-              "image": "itzg/minecraft-server",
+              "image": "itzg/minecraft-bedrock-server",
               "environmentVariables": [
                 {
                   "name": "WHITELIST",
@@ -168,7 +168,7 @@
                   "value": "[parameters('type')]"
                 },
                 {
-                  "name": "MODE",
+                  "name": "GAMEMODE",
                   "value": "[parameters('mode')]"
                 }
               ],
