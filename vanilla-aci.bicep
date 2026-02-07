@@ -20,14 +20,17 @@ param members string = ''
 @description('VISITORS - Visitors XUIDs (use , to separate them)')
 param visitors string = ''
 
-@description('Accept Minecraft server EULA?')
-param eula bool
+@description('Object ID of the user/service principal that will have access to Key Vault')
+param keyVaultAccessObjectId string = ''
+
+@description('Accept Minecraft server EULA? (true/false)')
+param eula string = 'true'
 
 @description('Max number of players')
 param maxPlayers int = 10
 
-@description('Allow cheats in the server')
-param allowCheats bool = false
+@description('Allow cheats in the server (true/false)')
+param allowCheats string = 'false'
 
 @description('Minecraft Bedrock version to run (LATEST, PREVIEW, or specific version)')
 param version string = 'LATEST'
@@ -50,16 +53,18 @@ param viewDistance int = 10
 @description('Tick distance')
 param tickDistance int = 4
 
-@description('Enable online mode (Xbox Live authentication)')
-param onlineMode bool = true
+@description('Enable online mode - Xbox Live authentication (true/false)')
+param onlineMode string = 'true'
 
-@description('Enable allow list (whitelist)')
-param allowList bool = false
+@description('Enable allow list - whitelist (true/false)')
+param allowList string = 'false'
 
 var fileShareName  = 'minecraftdata'
 var storageAccountType  = 'Standard_LRS'
 var location = resourceGroup().location
 var storageAccountName = '${serverName}storage'
+var keyVaultName = '${serverName}-kv'
+var tenantId = tenant().tenantId
 
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {
@@ -78,11 +83,193 @@ resource storageShare 'Microsoft.Storage/storageAccounts/fileServices/shares@201
   ]
 }
 
-resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2019-12-01' = {
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
+  name: keyVaultName
+  location: location
+  properties: {
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+    tenantId: tenantId
+    enabledForDeployment: true
+    enabledForTemplateDeployment: true
+    enableRbacAuthorization: false
+    accessPolicies: [
+      {
+        tenantId: tenantId
+        objectId: keyVaultAccessObjectId
+        permissions: {
+          secrets: [
+            'get'
+            'list'
+            'set'
+            'delete'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource secretAllowListUsers 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'allowListUsers'
+  properties: {
+    value: allowListUsers
+  }
+}
+
+resource secretOps 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'ops'
+  properties: {
+    value: ops
+  }
+}
+
+resource secretMembers 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'members'
+  properties: {
+    value: members
+  }
+}
+
+resource secretVisitors 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'visitors'
+  properties: {
+    value: visitors
+  }
+}
+
+resource secretStorageKey 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'storageAccountKey'
+  properties: {
+    value: storageAccount.listKeys().keys[0].value
+  }
+}
+
+resource secretEula 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'eula'
+  properties: {
+    value: toLower(eula) == 'true' ? 'TRUE' : 'FALSE'
+  }
+}
+
+resource secretVersion 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'version'
+  properties: {
+    value: version
+  }
+}
+
+resource secretGamemode 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'gamemode'
+  properties: {
+    value: gamemode
+  }
+}
+
+resource secretDifficulty 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'difficulty'
+  properties: {
+    value: difficulty
+  }
+}
+
+resource secretAllowCheats 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'allowCheats'
+  properties: {
+    value: toLower(allowCheats)
+  }
+}
+
+resource secretMaxPlayers 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'maxPlayers'
+  properties: {
+    value: string(maxPlayers)
+  }
+}
+
+resource secretOnlineMode 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'onlineMode'
+  properties: {
+    value: toLower(onlineMode)
+  }
+}
+
+resource secretAllowList 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'allowList'
+  properties: {
+    value: toLower(allowList)
+  }
+}
+
+resource secretLevelName 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'levelName'
+  properties: {
+    value: levelName
+  }
+}
+
+resource secretLevelSeed 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'levelSeed'
+  properties: {
+    value: levelSeed
+  }
+}
+
+resource secretViewDistance 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'viewDistance'
+  properties: {
+    value: string(viewDistance)
+  }
+}
+
+resource secretTickDistance 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'tickDistance'
+  properties: {
+    value: string(tickDistance)
+  }
+}
+
+resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2023-05-01' = {
   name: serverName
   location: location
   dependsOn: [
-    storageShare // Need to create the fileShare before creating the container.
+    storageShare
+    secretAllowListUsers
+    secretOps
+    secretMembers
+    secretVisitors
+    secretStorageKey
+    secretEula
+    secretVersion
+    secretGamemode
+    secretDifficulty
+    secretAllowCheats
+    secretMaxPlayers
+    secretOnlineMode
+    secretAllowList
+    secretLevelName
+    secretLevelSeed
+    secretViewDistance
+    secretTickDistance
   ]
   properties: {
     containers: [
@@ -93,7 +280,7 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2019-12-01'
           environmentVariables: [
             {
               name: 'EULA'
-              value: eula ? 'TRUE' : 'FALSE'
+              value: toLower(eula) == 'true' ? 'TRUE' : 'FALSE'
             }
             {
               name: 'VERSION'
@@ -113,19 +300,19 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2019-12-01'
             }
             {
               name: 'ALLOW_CHEATS'
-              value: allowCheats ? 'true' : 'false'
+              value: toLower(allowCheats)
             }
             {
               name: 'MAX_PLAYERS'
-              value: '${maxPlayers}'
+              value: string(maxPlayers)
             }
             {
               name: 'ONLINE_MODE'
-              value: onlineMode ? 'true' : 'false'
+              value: toLower(onlineMode)
             }
             {
               name: 'ALLOW_LIST'
-              value: allowList ? 'true' : 'false'
+              value: toLower(allowList)
             }
             {
               name: 'ALLOW_LIST_USERS'
@@ -153,11 +340,11 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2019-12-01'
             }
             {
               name: 'VIEW_DISTANCE'
-              value: '${viewDistance}'
+              value: string(viewDistance)
             }
             {
               name: 'TICK_DISTANCE'
-              value: '${tickDistance}'
+              value: string(tickDistance)
             }
           ]
           resources: {
@@ -207,5 +394,11 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2019-12-01'
     ]
   }
 }
+
+output keyVaultName string = keyVault.name
+output keyVaultId string = keyVault.id
+output containerGroupName string = containerGroup.name
+output containerIPAddress string = containerGroup.properties.ipAddress.ip
+output containerFQDN string = containerGroup.properties.ipAddress.fqdn
 
 
