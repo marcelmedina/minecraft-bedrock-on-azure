@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "6770589750861511606"
+      "templateHash": "13662922496244700097"
     }
   },
   "parameters": {
@@ -201,7 +201,7 @@
                 },
                 {
                   "name": "ALLOW_CHEATS",
-                  "value": "[format('{0}', parameters('allowCheats'))]"
+                  "value": "[if(parameters('allowCheats'), 'true', 'false')]"
                 },
                 {
                   "name": "MAX_PLAYERS",
@@ -209,11 +209,11 @@
                 },
                 {
                   "name": "ONLINE_MODE",
-                  "value": "[format('{0}', parameters('onlineMode'))]"
+                  "value": "[if(parameters('onlineMode'), 'true', 'false')]"
                 },
                 {
                   "name": "ALLOW_LIST",
-                  "value": "[format('{0}', parameters('allowList'))]"
+                  "value": "[if(parameters('allowList'), 'true', 'false')]"
                 },
                 {
                   "name": "ALLOW_LIST_USERS",

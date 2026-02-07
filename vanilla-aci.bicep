@@ -113,7 +113,7 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2019-12-01'
             }
             {
               name: 'ALLOW_CHEATS'
-              value: '${allowCheats}'
+              value: allowCheats ? 'true' : 'false'
             }
             {
               name: 'MAX_PLAYERS'
@@ -121,11 +121,11 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2019-12-01'
             }
             {
               name: 'ONLINE_MODE'
-              value: '${onlineMode}'
+              value: onlineMode ? 'true' : 'false'
             }
             {
               name: 'ALLOW_LIST'
-              value: '${allowList}'
+              value: allowList ? 'true' : 'false'
             }
             {
               name: 'ALLOW_LIST_USERS'
