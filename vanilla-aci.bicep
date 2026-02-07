@@ -95,7 +95,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
     enabledForDeployment: true
     enabledForTemplateDeployment: true
     enableRbacAuthorization: false
-    accessPolicies: [
+    accessPolicies: keyVaultAccessObjectId != '' ? [
       {
         tenantId: tenantId
         objectId: keyVaultAccessObjectId
@@ -108,7 +108,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
           ]
         }
       }
-    ]
+    ] : []
   }
 }
 

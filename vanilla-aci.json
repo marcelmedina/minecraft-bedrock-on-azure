@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "78063578595656671"
+      "templateHash": "15214674116983019216"
     }
   },
   "parameters": {
@@ -191,20 +191,7 @@
         "enabledForDeployment": true,
         "enabledForTemplateDeployment": true,
         "enableRbacAuthorization": false,
-        "accessPolicies": [
-          {
-            "tenantId": "[variables('tenantId')]",
-            "objectId": "[parameters('keyVaultAccessObjectId')]",
-            "permissions": {
-              "secrets": [
-                "get",
-                "list",
-                "set",
-                "delete"
-              ]
-            }
-          }
-        ]
+        "accessPolicies": "[if(not(equals(parameters('keyVaultAccessObjectId'), '')), createArray(createObject('tenantId', variables('tenantId'), 'objectId', parameters('keyVaultAccessObjectId'), 'permissions', createObject('secrets', createArray('get', 'list', 'set', 'delete')))), createArray())]"
       }
     },
     {
