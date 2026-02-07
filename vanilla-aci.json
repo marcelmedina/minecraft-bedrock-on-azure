@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "15214674116983019216"
+      "templateHash": "13662922496244700097"
     }
   },
   "parameters": {
@@ -58,18 +58,10 @@
         "description": "VISITORS - Visitors XUIDs (use , to separate them)"
       }
     },
-    "keyVaultAccessObjectId": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Object ID of the user/service principal that will have access to Key Vault"
-      }
-    },
     "eula": {
-      "type": "string",
-      "defaultValue": "true",
+      "type": "bool",
       "metadata": {
-        "description": "Accept Minecraft server EULA? (true/false)"
+        "description": "Accept Minecraft server EULA?"
       }
     },
     "maxPlayers": {
@@ -80,10 +72,10 @@
       }
     },
     "allowCheats": {
-      "type": "string",
-      "defaultValue": "false",
+      "type": "bool",
+      "defaultValue": false,
       "metadata": {
-        "description": "Allow cheats in the server (true/false)"
+        "description": "Allow cheats in the server"
       }
     },
     "version": {
@@ -136,17 +128,17 @@
       }
     },
     "onlineMode": {
-      "type": "string",
-      "defaultValue": "true",
+      "type": "bool",
+      "defaultValue": true,
       "metadata": {
-        "description": "Enable online mode - Xbox Live authentication (true/false)"
+        "description": "Enable online mode (Xbox Live authentication)"
       }
     },
     "allowList": {
-      "type": "string",
-      "defaultValue": "false",
+      "type": "bool",
+      "defaultValue": false,
       "metadata": {
-        "description": "Enable allow list - whitelist (true/false)"
+        "description": "Enable allow list (whitelist)"
       }
     }
   },
@@ -154,9 +146,7 @@
     "fileShareName": "minecraftdata",
     "storageAccountType": "Standard_LRS",
     "location": "[resourceGroup().location]",
-    "storageAccountName": "[format('{0}storage', parameters('serverName'))]",
-    "keyVaultName": "[format('{0}-kv', parameters('serverName'))]",
-    "tenantId": "[tenant().tenantId]"
+    "storageAccountName": "[format('{0}storage', parameters('serverName'))]"
   },
   "resources": [
     {
@@ -178,213 +168,8 @@
       ]
     },
     {
-      "type": "Microsoft.KeyVault/vaults",
-      "apiVersion": "2023-07-01",
-      "name": "[variables('keyVaultName')]",
-      "location": "[variables('location')]",
-      "properties": {
-        "sku": {
-          "family": "A",
-          "name": "standard"
-        },
-        "tenantId": "[variables('tenantId')]",
-        "enabledForDeployment": true,
-        "enabledForTemplateDeployment": true,
-        "enableRbacAuthorization": false,
-        "accessPolicies": "[if(not(equals(parameters('keyVaultAccessObjectId'), '')), createArray(createObject('tenantId', variables('tenantId'), 'objectId', parameters('keyVaultAccessObjectId'), 'permissions', createObject('secrets', createArray('get', 'list', 'set', 'delete')))), createArray())]"
-      }
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'allowListUsers')]",
-      "properties": {
-        "value": "[parameters('allowListUsers')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'ops')]",
-      "properties": {
-        "value": "[parameters('ops')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'members')]",
-      "properties": {
-        "value": "[parameters('members')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'visitors')]",
-      "properties": {
-        "value": "[parameters('visitors')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'storageAccountKey')]",
-      "properties": {
-        "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-04-01').keys[0].value]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'eula')]",
-      "properties": {
-        "value": "[if(equals(toLower(parameters('eula')), 'true'), 'TRUE', 'FALSE')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'version')]",
-      "properties": {
-        "value": "[parameters('version')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'gamemode')]",
-      "properties": {
-        "value": "[parameters('gamemode')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'difficulty')]",
-      "properties": {
-        "value": "[parameters('difficulty')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'allowCheats')]",
-      "properties": {
-        "value": "[toLower(parameters('allowCheats'))]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'maxPlayers')]",
-      "properties": {
-        "value": "[string(parameters('maxPlayers'))]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'onlineMode')]",
-      "properties": {
-        "value": "[toLower(parameters('onlineMode'))]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'allowList')]",
-      "properties": {
-        "value": "[toLower(parameters('allowList'))]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'levelName')]",
-      "properties": {
-        "value": "[parameters('levelName')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'levelSeed')]",
-      "properties": {
-        "value": "[parameters('levelSeed')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'viewDistance')]",
-      "properties": {
-        "value": "[string(parameters('viewDistance'))]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.KeyVault/vaults/secrets",
-      "apiVersion": "2023-07-01",
-      "name": "[format('{0}/{1}', variables('keyVaultName'), 'tickDistance')]",
-      "properties": {
-        "value": "[string(parameters('tickDistance'))]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-      ]
-    },
-    {
       "type": "Microsoft.ContainerInstance/containerGroups",
-      "apiVersion": "2023-05-01",
+      "apiVersion": "2019-12-01",
       "name": "[parameters('serverName')]",
       "location": "[variables('location')]",
       "properties": {
@@ -396,7 +181,7 @@
               "environmentVariables": [
                 {
                   "name": "EULA",
-                  "value": "[if(equals(toLower(parameters('eula')), 'true'), 'TRUE', 'FALSE')]"
+                  "value": "[if(parameters('eula'), 'TRUE', 'FALSE')]"
                 },
                 {
                   "name": "VERSION",
@@ -416,19 +201,19 @@
                 },
                 {
                   "name": "ALLOW_CHEATS",
-                  "value": "[toLower(parameters('allowCheats'))]"
+                  "value": "[if(parameters('allowCheats'), 'true', 'false')]"
                 },
                 {
                   "name": "MAX_PLAYERS",
-                  "value": "[string(parameters('maxPlayers'))]"
+                  "value": "[format('{0}', parameters('maxPlayers'))]"
                 },
                 {
                   "name": "ONLINE_MODE",
-                  "value": "[toLower(parameters('onlineMode'))]"
+                  "value": "[if(parameters('onlineMode'), 'true', 'false')]"
                 },
                 {
                   "name": "ALLOW_LIST",
-                  "value": "[toLower(parameters('allowList'))]"
+                  "value": "[if(parameters('allowList'), 'true', 'false')]"
                 },
                 {
                   "name": "ALLOW_LIST_USERS",
@@ -456,11 +241,11 @@
                 },
                 {
                   "name": "VIEW_DISTANCE",
-                  "value": "[string(parameters('viewDistance'))]"
+                  "value": "[format('{0}', parameters('viewDistance'))]"
                 },
                 {
                   "name": "TICK_DISTANCE",
-                  "value": "[string(parameters('tickDistance'))]"
+                  "value": "[format('{0}', parameters('tickDistance'))]"
                 }
               ],
               "resources": {
@@ -510,48 +295,9 @@
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'allowCheats')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'allowList')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'allowListUsers')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'difficulty')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'eula')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'gamemode')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'levelName')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'levelSeed')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'maxPlayers')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'members')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'onlineMode')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'ops')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'storageAccountKey')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'tickDistance')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'version')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'viewDistance')]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), 'visitors')]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', split(format('{0}/default/{1}', variables('storageAccountName'), variables('fileShareName')), '/')[0], split(format('{0}/default/{1}', variables('storageAccountName'), variables('fileShareName')), '/')[1], split(format('{0}/default/{1}', variables('storageAccountName'), variables('fileShareName')), '/')[2])]"
       ]
     }
-  ],
-  "outputs": {
-    "keyVaultName": {
-      "type": "string",
-      "value": "[variables('keyVaultName')]"
-    },
-    "keyVaultId": {
-      "type": "string",
-      "value": "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
-    },
-    "containerGroupName": {
-      "type": "string",
-      "value": "[parameters('serverName')]"
-    },
-    "containerIPAddress": {
-      "type": "string",
-      "value": "[reference(resourceId('Microsoft.ContainerInstance/containerGroups', parameters('serverName')), '2023-05-01').ipAddress.ip]"
-    },
-    "containerFQDN": {
-      "type": "string",
-      "value": "[reference(resourceId('Microsoft.ContainerInstance/containerGroups', parameters('serverName')), '2023-05-01').ipAddress.fqdn]"
-    }
-  }
+  ]
 }
