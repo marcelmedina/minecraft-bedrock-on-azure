@@ -1,6 +1,8 @@
 
-@description('Server Name. (will be used as the DNS Label and in-game server name)')
-param serverName string=''
+@description('Server DNS name label (used for Azure DNS label and resource names). Must be 1-63 chars, lowercase letters, numbers, and hyphens.')
+@minLength(1)
+@maxLength(63)
+param serverName string
 
 @description('CPUs for the server')
 param numberCpuCores int = 2
