@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.26.170.59819",
-      "templateHash": "5193954101278111201"
+      "version": "0.39.26.7824",
+      "templateHash": "6770589750861511606"
     }
   },
   "parameters": {
@@ -13,7 +13,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Server Name. (will be used as the DNS Label)"
+        "description": "Server Name. (will be used as the DNS Label and in-game server name)"
       }
     },
     "numberCpuCores": {
@@ -27,69 +27,118 @@
       "type": "int",
       "defaultValue": 4,
       "metadata": {
-        "description": "Memory available to the server. Will allocate all except 100MB to Java"
+        "description": "Memory available to the server in GB"
       }
     },
-    "whitelist": {
+    "allowListUsers": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Whitelist of players that will be allowed in the server (use , to separate them)"
+        "description": "Whitelist of players - format: username1:XUID1,username2:XUID2"
       }
     },
     "ops": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Players that can issue commands (use , to separate them)"
+        "description": "OPS - Operators XUIDs (use , to separate them)"
+      }
+    },
+    "members": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "MEMBERS - Members XUIDs (use , to separate them)"
+      }
+    },
+    "visitors": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "VISITORS - Visitors XUIDs (use , to separate them)"
       }
     },
     "eula": {
       "type": "bool",
       "metadata": {
-        "description": "Accept minecraft server EULA?"
+        "description": "Accept Minecraft server EULA?"
       }
     },
     "maxPlayers": {
       "type": "int",
-      "defaultValue": 2,
+      "defaultValue": 10,
       "metadata": {
         "description": "Max number of players"
       }
     },
-    "enableCommandBlock": {
+    "allowCheats": {
       "type": "bool",
-      "defaultValue": true,
+      "defaultValue": false,
       "metadata": {
-        "description": "Enable the use of command blocks?"
-      }
-    },
-    "motd": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Server Message of the day"
+        "description": "Allow cheats in the server"
       }
     },
     "version": {
       "type": "string",
       "defaultValue": "LATEST",
       "metadata": {
-        "description": "Minecraft version to run (use LATEST for current version)"
+        "description": "Minecraft Bedrock version to run (LATEST, PREVIEW, or specific version)"
       }
     },
-    "type": {
+    "gamemode": {
       "type": "string",
-      "defaultValue": "PAPER",
+      "defaultValue": "survival",
       "metadata": {
-        "description": "Server type (VANILLA, FORGE, BUKKIT, SPIGOT, PAPER, FTB, CURSEFORGE, SPONGEVANILLA, SPONGEFORGE)"
+        "description": "Game mode: survival, creative, adventure"
       }
     },
-    "mode": {
+    "difficulty": {
       "type": "string",
-      "defaultValue": "creative",
+      "defaultValue": "normal",
       "metadata": {
-        "description": "Server mode (survival, creative, adventure, spectator)"
+        "description": "Difficulty: peaceful, easy, normal, hard"
+      }
+    },
+    "levelName": {
+      "type": "string",
+      "defaultValue": "Bedrock level",
+      "metadata": {
+        "description": "Level name (world name)"
+      }
+    },
+    "levelSeed": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Level seed (leave empty for random)"
+      }
+    },
+    "viewDistance": {
+      "type": "int",
+      "defaultValue": 10,
+      "metadata": {
+        "description": "View distance"
+      }
+    },
+    "tickDistance": {
+      "type": "int",
+      "defaultValue": 4,
+      "metadata": {
+        "description": "Tick distance"
+      }
+    },
+    "onlineMode": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Enable online mode (Xbox Live authentication)"
+      }
+    },
+    "allowList": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable allow list (whitelist)"
       }
     }
   },
@@ -97,8 +146,7 @@
     "fileShareName": "minecraftdata",
     "storageAccountType": "Standard_LRS",
     "location": "[resourceGroup().location]",
-    "storageAccountName": "[format('{0}storage', parameters('serverName'))]",
-    "javaMemory": "[sub(mul(parameters('memory'), 1024), 200)]"
+    "storageAccountName": "[format('{0}storage', parameters('serverName'))]"
   },
   "resources": [
     {
@@ -132,44 +180,72 @@
               "image": "itzg/minecraft-bedrock-server",
               "environmentVariables": [
                 {
-                  "name": "WHITELIST",
-                  "value": "[parameters('whitelist')]"
-                },
-                {
-                  "name": "OPS",
-                  "value": "[parameters('ops')]"
-                },
-                {
-                  "name": "MAX_PLAYERS",
-                  "value": "[format('{0}', parameters('maxPlayers'))]"
-                },
-                {
-                  "name": "ENABLE_COMMAND_BLOCK",
-                  "value": "[format('{0}', parameters('enableCommandBlock'))]"
-                },
-                {
-                  "name": "MOTD",
-                  "value": "[parameters('motd')]"
-                },
-                {
-                  "name": "MEMORY",
-                  "value": "[format('{0}M', variables('javaMemory'))]"
-                },
-                {
                   "name": "EULA",
-                  "value": "[format('{0}', parameters('eula'))]"
+                  "value": "[if(parameters('eula'), 'TRUE', 'FALSE')]"
                 },
                 {
                   "name": "VERSION",
                   "value": "[parameters('version')]"
                 },
                 {
-                  "name": "TYPE",
-                  "value": "[parameters('type')]"
+                  "name": "SERVER_NAME",
+                  "value": "[parameters('serverName')]"
                 },
                 {
                   "name": "GAMEMODE",
-                  "value": "[parameters('mode')]"
+                  "value": "[parameters('gamemode')]"
+                },
+                {
+                  "name": "DIFFICULTY",
+                  "value": "[parameters('difficulty')]"
+                },
+                {
+                  "name": "ALLOW_CHEATS",
+                  "value": "[format('{0}', parameters('allowCheats'))]"
+                },
+                {
+                  "name": "MAX_PLAYERS",
+                  "value": "[format('{0}', parameters('maxPlayers'))]"
+                },
+                {
+                  "name": "ONLINE_MODE",
+                  "value": "[format('{0}', parameters('onlineMode'))]"
+                },
+                {
+                  "name": "ALLOW_LIST",
+                  "value": "[format('{0}', parameters('allowList'))]"
+                },
+                {
+                  "name": "ALLOW_LIST_USERS",
+                  "value": "[parameters('allowListUsers')]"
+                },
+                {
+                  "name": "OPS",
+                  "value": "[parameters('ops')]"
+                },
+                {
+                  "name": "MEMBERS",
+                  "value": "[parameters('members')]"
+                },
+                {
+                  "name": "VISITORS",
+                  "value": "[parameters('visitors')]"
+                },
+                {
+                  "name": "LEVEL_NAME",
+                  "value": "[parameters('levelName')]"
+                },
+                {
+                  "name": "LEVEL_SEED",
+                  "value": "[parameters('levelSeed')]"
+                },
+                {
+                  "name": "VIEW_DISTANCE",
+                  "value": "[format('{0}', parameters('viewDistance'))]"
+                },
+                {
+                  "name": "TICK_DISTANCE",
+                  "value": "[format('{0}', parameters('tickDistance'))]"
                 }
               ],
               "resources": {
@@ -179,10 +255,6 @@
                 }
               },
               "ports": [
-                {
-                  "port": 25565,
-                  "protocol": "TCP"
-                },
                 {
                   "port": 19132,
                   "protocol": "UDP"
@@ -203,10 +275,6 @@
           "type": "Public",
           "ports": [
             {
-              "protocol": "TCP",
-              "port": 25565
-            },
-            {
               "protocol": "UDP",
               "port": 19132
             }
@@ -221,7 +289,7 @@
               "readOnly": false,
               "shareName": "[variables('fileShareName')]",
               "storageAccountName": "[variables('storageAccountName')]",
-              "storageAccountKey": "[listKeys(variables('storageAccountName'), '2021-04-01').keys[0].value]"
+              "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-04-01').keys[0].value]"
             }
           }
         ]
