@@ -11,7 +11,7 @@ To run it, just create a deployment on azure from a template, pointing it to the
 
 To deploy the servers:
 
-Vanilla: [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmarcelmedina%2Fminecraft-bedrock-on-azure%2Fdevelop%2Fvanilla-aci.json)
+Vanilla: [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmarcelmedina%2Fminecraft-bedrock-on-azure%2Fmaster%2Fvanilla-aci.json)
 
 ## Playing from iPhone, Xbox or PS4?
 
